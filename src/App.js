@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import Node from './Components/NodeTree';
+import NodeTree from './Components/NodeTree';
 import AddTaskModal from './Components/AddTaskModal'
 import {findAndDeleteFirst, findAndModifyFirst, findFirst} from 'obj-traverse/lib/obj-traverse';
 import {INITIAL_TASKS_STATE} from './Utils/Constants';
@@ -61,23 +61,30 @@ class App extends Component {
     }
   };
 
+  onMove = (id, overId, parentId) => {
+    const draggedElement = findFirst(this.state, 'tasks', {id: parentId});
+    const stateWithoutDeleteElement = findAndDeleteFirst(this.state, 'tasks', {id});
+    const parent = findFirst(this.state, 'tasks', {id: parentId});
+
+    if(parent) {
+      const overElementIndex = parent.tasks.findIndex((item) => item.id === overId);
+      const newParentArray = parent.tasks.splice(overElementIndex, 0, draggedElement);
+      const modifiedState = findAndModifyFirst(this.state.tasks, 'tasks', {id: parentId}, {...parent, tasks: newParentArray});
+
+      this.setState(modifiedState)
+    }
+  };
+
   render() {
     return (
       <div className="app">
-        {
-          this.state.tasks.map((item, index) => (
-            <Node
-              key={item.id}
-              index={item.id}
-              node={item}
-              isOpenTasks={item.isOpen}
-              children={item.tasks}
-              onDelete={this.onDelete}
-              onOpenAddModal={this.toggleModal}
-              onCollapseChildren={this.onCollapse}
-            />
-          ))
-        }
+        <NodeTree
+          tasks={this.state.tasks}
+          onDelete={this.onDelete}
+          onOpenModal={this.toggleModal}
+          onCollapse={this.onCollapse}
+          onMove={this.onMove}
+        />
 
         <AddTaskModal
           isOpen={this.state.isOpenModal}
@@ -85,7 +92,6 @@ class App extends Component {
           onAddTask={this.onAddTask}
           level={this.state.currentModifiedLevel}
         />
-
       </div>
     );
   }

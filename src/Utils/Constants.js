@@ -59,3 +59,6 @@ export const INITIAL_TASKS_STATE = [
   }
 ];
 
+export const ITEM_TYPES = {
+  NODE: 'node'
+};

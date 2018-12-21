@@ -1,126 +1,118 @@
 import React from 'react';
-import {MAX_NESTING_LEVEL} from '../Utils/Constants';
-import {DragSource} from 'react-dnd';
+import {MAX_NESTING_LEVEL, ITEM_TYPES} from '../Utils/Constants';
+import {DragSource, DropTarget} from 'react-dnd';
+import NodeTree from './NodeTree';
 
-const ItemTypes = {
-  NODE: 'node'
-};
-
-const nodeSource = {
+const source = {
   beginDrag(props) {
-    return {};
+    return {
+      id: props.node.id,
+      parentId: props.node.parentId,
+      tasks: props.node.tasks
+    }
+  },
+  isDragging(props, monitor) {
+    return props.node.id === monitor.getItem().id
+  },
+  endDrag(props, monitor) {
+    const source = monitor.getItem();
+    const target = monitor.getDropResult();
+
   }
 };
 
-function collect(connect, monitor) {
-  return {
-    connectDragSource: connect.dragSource(),
-    isDragging: monitor.isDragging()
-  }
-}
+const target = {
+  canDrop() {
+    return false
+  },
 
-class NodeTree extends React.Component {
+  hover(props, monitor) {
+    const {id: draggedId} = monitor.getItem();
+    const overId = props.node.id;
+
+    props.onMove(draggedId, overId, props.node.parentId)
+  }
+};
+
+
+class Node extends React.Component {
   onCollapse = () => {
-    const {onCollapseChildren, index} = this.props;
-    onCollapseChildren(index);
+    const {onCollapse, node} = this.props;
+    onCollapse(node.id);
   };
 
   onDelete = () => {
-    const {onDelete, index} = this.props;
-    onDelete(index);
+    const {onDelete, node} = this.props;
+    onDelete(node.id);
   };
 
-  onOpenAddModal = () => {
-    const {onOpenAddModal, node} = this.props;
-    onOpenAddModal(node.parentId)
+  onOpenModal = () => {
+    const {onOpenModal, node} = this.props;
+    onOpenModal(node.parentId)
   };
 
   render() {
-    const {level, node, children, isOpenTasks} = this.props;
-    let childnodes = null;
-    const levelInfo = level ? {
-      num: level + 1,
-      type: 'Task'
-    } : {
-      num: 1,
-      type: 'User'
-    };
+    const {node, level, connectDropTarget, connectDragSource, connectDragPreview} = this.props;
+    const itemLevel = (level) ? level + 1 : 1;
+    const nodeType = (itemLevel === 1) ? 'User' : 'Task';
 
-    if (children) {
-      childnodes = children.map((childnode, index) => {
-        return (
+    return connectDropTarget(connectDragPreview(
+      <div>
+        {
+          connectDragSource(
+            <div className={`level__item level__item--${itemLevel}`}>
+              <p className="level__item-title">
+                {nodeType} "{node.title}" (Level {itemLevel})  {node.id}
+              </p>
+              <div className="level_item_actions">
+                <button
+                  className="btn"
+                  onClick={this.onDelete}
+                >
+                  X
+                </button>
+                <button
+                  className="btn"
+                  onClick={this.onOpenModal}
+                >
+                  +
+                </button>
+                {
+                  itemLevel !== MAX_NESTING_LEVEL &&
+                  <button
+                    className="btn"
+                    onClick={this.onCollapse}
+                  >
+                    {node.isOpen ? 'V' : '>'}
+                  </button>
+                }
+              </div>
+            </div>
+          )
+        }
+        {
+          node.isOpen &&
           <NodeTree
-            node={childnode}
-            children={childnode.tasks}
-            index={childnode.id}
-            isOpenTasks={childnode.isOpen}
-            onCollapseChildren={this.props.onCollapseChildren}
+            tasks={node.tasks}
             onDelete={this.props.onDelete}
-            onOpenAddModal={this.props.onOpenAddModal}
-            level={levelInfo.num}
+            onOpenModal={this.props.onOpenModal}
+            onCollapse={this.props.onCollapse}
+            onMove={this.props.onMove}
+            level={itemLevel}
           />
-        );
-      });
-    }
-
-    return (
-      <div key={node.id}>
-        <Node
-          level={level}
-          node={node}
-          isOpenTasks={isOpenTasks}
-        />
-        {childnodes && isOpenTasks ? <div className="level__container">{childnodes}</div> : null}
+        }
       </div>
-    );
+    ));
   }
 }
 
-class Node extends React.Component {
-  render() {
-    const {level, node, isOpenTasks} = this.props;
-    let childnodes = null;
-    const levelInfo = level ? {
-      num: level + 1,
-      type: 'Task'
-    } : {
-      num: 1,
-      type: 'User'
-    };
+Node = DropTarget(ITEM_TYPES.NODE, target, connect => ({
+  connectDropTarget: connect.dropTarget()
+}))(Node);
+Node = DragSource(ITEM_TYPES.NODE, source, (connect, monitor) => ({
+  connectDragSource: connect.dragSource(),
+  connectDragPreview: connect.dragPreview(),
+  isDragging: monitor.isDragging()
+}))(Node);
 
-    return this.props.connectDragSource(
-      <div className={`level__item level__item--${levelInfo.num}`}>
-        <p className="level__item-title">
-          {levelInfo.type} "{node.title}" (Level {levelInfo.num})
-        </p>
-        <div className="level_item_actions">
-          <button
-            className="btn"
-            onClick={this.onDelete}
-          >
-            X
-          </button>
-          <button
-            className="btn"
-            onClick={this.onOpenAddModal}
-          >
-            +
-          </button>
-          {
-            levelInfo.num !== MAX_NESTING_LEVEL &&
-            <button
-              className="btn"
-              onClick={this.onCollapse}
-            >
-              { isOpenTasks ? 'V' : '>' }
-            </button>
-          }
-
-        </div>
-      </div>);
-  }
-}
-
-Node = DragSource(ItemTypes.NODE, nodeSource, collect)(Node);
-
-export default NodeTree;
+export default Node;

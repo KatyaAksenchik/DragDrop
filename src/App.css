@@ -15,6 +15,10 @@
   padding: 2em;
 }
 
+.app > .level__container {
+  padding-left: 0;
+}
+
 .btn {
   background-color: transparent;
   border: none;
