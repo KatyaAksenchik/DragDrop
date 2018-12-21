@@ -1,15 +1,14 @@
 import React, {Component} from 'react';
-// import logo from './logo.svg';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import NodeTree from './Components/NodeTree';
 import AddTaskModal from './Components/AddTaskModal'
-import {findAndDeleteFirst, findAndModifyFirst, findFirst} from 'obj-traverse/lib/obj-traverse';
+import {findAndDeleteFirst, findAndModifyFirst, findFirst, findAll} from 'obj-traverse/lib/obj-traverse';
 import {INITIAL_TASKS_STATE} from './Utils/Constants';
 
 
-let TASKS_ENUM = INITIAL_TASKS_STATE.length;
+let TASKS_ENUM = 9;
 
 class App extends Component {
   constructor(props) {
@@ -24,12 +23,15 @@ class App extends Component {
   onCollapse = (itemId) => {
     const task = findFirst(this.state, 'tasks', {id: itemId});
     const modifiedState = findAndModifyFirst(this.state, 'tasks', {id: itemId}, {...task, isOpen: !task.isOpen});
-    this.setState(modifiedState);
+    console.log("modifiedState",modifiedState)
+    modifiedState !== false && this.setState({
+      tasks: modifiedState.tasks
+    });
   };
 
   onDelete = (itemId) => {
     const modifiedState = findAndDeleteFirst(this.state, 'tasks', {id: itemId});
-    this.setState(modifiedState);
+    modifiedState !== false && this.setState(modifiedState);
   };
 
   toggleModal = (currentModifiedLevel = null) => {
@@ -41,15 +43,16 @@ class App extends Component {
 
   onAddTask = (value, parentId = null) => {
     TASKS_ENUM++;
+
     const newTask = {
       id: TASKS_ENUM,
       title: value,
       parentId: parentId,
-      tasks: null
+      tasks: []
     };
 
     if (parentId !== null) {
-      const parent = findFirst(this.state, 'tasks', {id: parentId});
+      const parent = findAll(this.state, 'tasks', {id: parentId})[0];
       const parentTasks = (parent.tasks.length) ? [...parent.tasks, newTask] : [newTask];
 
       const modifiedState = findAndModifyFirst(this.state, 'tasks', {id: parentId}, {...parent, tasks: parentTasks});
@@ -71,7 +74,7 @@ class App extends Component {
       const newParentArray = parent.tasks.splice(overElementIndex, 0, draggedElement);
       const modifiedState = findAndModifyFirst(this.state.tasks, 'tasks', {id: parentId}, {...parent, tasks: newParentArray});
 
-      this.setState(modifiedState)
+      // this.setState(modifiedState)
     }
   };
 

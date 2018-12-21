@@ -16,7 +16,7 @@ export default class AddTaskModal extends React.Component {
 
 
   handleSubmit = () => {
-    this.props.onAddTask(this.state.value, this.props.level);
+    this.state.value && this.props.onAddTask(this.state.value, this.props.level);
     this.onClose();
   };
 

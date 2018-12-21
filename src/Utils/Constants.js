@@ -15,15 +15,18 @@ export const INITIAL_TASKS_STATE = [
         tasks: [{
           id: 2,
           title: 'clean wheels',
-          parentId: 1
+          parentId: 1,
+          tasks: []
         }, {
           id: 3,
           title: 'clean windows',
-          parentId: 1
+          parentId: 1,
+          tasks: []
         }, {
           id: 4,
           title: 'clean seats',
-          parentId: 1
+          parentId: 1,
+          tasks: []
         }
         ]
       }
@@ -43,15 +46,18 @@ export const INITIAL_TASKS_STATE = [
         tasks: [{
           id: 7,
           title: 'clean wheels',
-          parentId: 6
+          parentId: 6,
+          tasks: []
         }, {
           id: 8,
           title: 'clean windows',
-          parentId: 6
+          parentId: 6,
+          tasks: []
         }, {
           id: 9,
           title: 'clean seats',
-          parentId: 6
+          parentId: 6,
+          tasks: []
         }
         ]
       }

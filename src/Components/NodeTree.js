@@ -5,10 +5,11 @@ import {ITEM_TYPES} from '../Utils/Constants';
 
 
 const target = {
-  drop() {},
+  drop() {
+  },
 
   hover(props, monitor) {
-    const {...params } = monitor.getItem();
+    const {...params} = monitor.getItem();
 
     // if (!monitor.isOver({shallow: true})) return
     //
@@ -24,29 +25,29 @@ class NodeTree extends React.Component {
   render() {
     const {tasks, level, connectDropTarget} = this.props;
 
-    return connectDropTarget(
+    // return connectDropTarget(
+    return (
       <div className="level__container">
         {
-          (tasks && tasks.length ) ? (
-            tasks.map((node) => {
-              return <Node
-                node={node}
-                onDelete={this.props.onDelete}
-                onOpenModal={this.props.onOpenModal}
-                onCollapse={this.props.onCollapse}
-                level={level}
-                onMove={this.props.onMove}
-              />
-            })
-          ) : null
+          tasks && !!tasks.length && tasks.map((node, index) => {
+            return <Node
+              key={node.id}
+              node={node}
+              onDelete={this.props.onDelete}
+              onOpenModal={this.props.onOpenModal}
+              onCollapse={this.props.onCollapse}
+              level={level}
+              onMove={this.props.onMove}
+            />
+          })
         }
       </div>
     )
   }
 }
 
-NodeTree = DropTarget(ITEM_TYPES.NODE, target, (connect, monitor) => ({
-  connectDropTarget: connect.dropTarget()
-}))(NodeTree);
+// NodeTree = DropTarget(ITEM_TYPES.NODE, target, (connect, monitor) => ({
+//   connectDropTarget: connect.dropTarget()
+// }))(NodeTree);
 
 export default NodeTree;

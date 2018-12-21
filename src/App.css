@@ -28,6 +28,7 @@
 }
 
 .level__container {
+  position: relative;
   padding-left: var(--container-level-offset);
 }
 
