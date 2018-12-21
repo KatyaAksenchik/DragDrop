@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import Node from './Components/DragableListItem';
+import Node from './Components/NodeTree';
 import AddTaskModal from './Components/AddTaskModal'
 import {findAndDeleteFirst, findAndModifyFirst, findFirst} from 'obj-traverse/lib/obj-traverse';
 import {INITIAL_TASKS_STATE} from './Utils/Constants';
@@ -85,6 +85,7 @@ class App extends Component {
           onAddTask={this.onAddTask}
           level={this.state.currentModifiedLevel}
         />
+
       </div>
     );
   }
