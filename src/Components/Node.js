@@ -56,14 +56,14 @@ class Node extends React.Component {
     const itemLevel = (level) ? level + 1 : 1;
     const nodeType = (itemLevel === 1) ? 'User' : 'Task';
 
-    // return connectDropTarget(connectDragPreview(
-    return(
+    return connectDropTarget(connectDragPreview(
+      // return(
       <div>
         {
-          // connectDragSource(
+          connectDragSource(
             <div className={`level__item level__item--${itemLevel}`}>
               <p className="level__item-title">
-                {nodeType} "{node.title}" (Level {itemLevel})  {node.id}
+                {nodeType} "{node.title}" (Level {itemLevel}) {node.id}
               </p>
               <div className="level_item_actions">
                 <button
@@ -91,7 +91,7 @@ class Node extends React.Component {
                 }
               </div>
             </div>
-          // )
+          )
         }
         {
           node.isOpen &&
@@ -105,18 +105,15 @@ class Node extends React.Component {
           />
         }
       </div>
-    // )
-  );
+      )
+    );
   }
 }
 
-// Node = DropTarget(ITEM_TYPES.NODE, target, connect => ({
-//   connectDropTarget: connect.dropTarget()
-// }))(Node);
-// Node = DragSource(ITEM_TYPES.NODE, source, (connect, monitor) => ({
-//   connectDragSource: connect.dragSource(),
-//   connectDragPreview: connect.dragPreview(),
-//   isDragging: monitor.isDragging()
-// }))(Node);
-
-export default Node;
+export default DropTarget(ITEM_TYPES.NODE, target, connect => ({
+  connectDropTarget: connect.dropTarget()
+}))(DragSource(ITEM_TYPES.NODE, source, (connect, monitor) => ({
+  connectDragSource: connect.dragSource(),
+  connectDragPreview: connect.dragPreview(),
+  isDragging: monitor.isDragging()
+}))(Node));

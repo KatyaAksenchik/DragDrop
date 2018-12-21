@@ -25,8 +25,8 @@ class NodeTree extends React.Component {
   render() {
     const {tasks, level, connectDropTarget} = this.props;
 
-    // return connectDropTarget(
-    return (
+    return connectDropTarget(
+    // return (
       <div className="level__container">
         {
           tasks && !!tasks.length && tasks.map((node, index) => {
@@ -46,8 +46,8 @@ class NodeTree extends React.Component {
   }
 }
 
-// NodeTree = DropTarget(ITEM_TYPES.NODE, target, (connect, monitor) => ({
-//   connectDropTarget: connect.dropTarget()
-// }))(NodeTree);
+NodeTree = DropTarget(ITEM_TYPES.NODE, target, (connect, monitor) => ({
+  connectDropTarget: connect.dropTarget()
+}))(NodeTree);
 
 export default NodeTree;
