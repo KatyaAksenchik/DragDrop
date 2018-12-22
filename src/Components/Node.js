@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import {MAX_NESTING_LEVEL, ITEM_TYPES} from '../Utils/Constants';
 import {DragSource, DropTarget} from 'react-dnd';
 import NodeTree from './NodeTree';
+import {MAX_NESTING_LEVEL, ITEM_TYPES} from '../Utils/Constants';
 
 const source = {
   beginDrag(props) {
@@ -23,7 +23,7 @@ const target = {
   },
 
   hover(props, monitor) {
-    const {id: draggedId, level: draggedLevel} = monitor.getItem();
+    const {id: draggedId} = monitor.getItem();
 
     const overId = props.node.id;
     const parentId = props.node.parentId;
@@ -49,21 +49,24 @@ class Node extends Component {
 
   onOpenModal = () => {
     const {onOpenModal, node} = this.props;
-    onOpenModal(node.parentId)
+    onOpenModal({
+      id: node.id,
+      parentId :node.parentId
+    })
   };
 
   render() {
     const {node, level, connectDropTarget, connectDragSource, connectDragPreview} = this.props;
-    const itemLevel = (level) ? level + 1 : 1;
-    const nodeType = (itemLevel === 1) ? 'User' : 'Task';
+    const nodeLevel = (level) ? level + 1 : 1;
+    const nodeType = (nodeLevel === 1) ? 'User' : 'Task';
 
     return connectDropTarget(connectDragPreview(
       <div>
         {
           connectDragSource(
-            <div className={`level__item level__item--${itemLevel}`}>
+            <div className={`level__item level__item--${nodeLevel}`}>
               <p className="level__item-title">
-                {nodeType} "{node.title}" (Level {itemLevel}) {node.id}
+                {nodeType} "{node.title}" (Level {nodeLevel})
               </p>
               <div className="level_item_actions">
                 <button
@@ -79,7 +82,7 @@ class Node extends Component {
                   +
                 </button>
                 {
-                  itemLevel !== MAX_NESTING_LEVEL &&
+                  nodeLevel !== MAX_NESTING_LEVEL &&
                   node.tasks &&
                   !!node.tasks.length &&
                   <button
@@ -101,7 +104,7 @@ class Node extends Component {
             onOpenModal={this.props.onOpenModal}
             onCollapse={this.props.onCollapse}
             onMove={this.props.onMove}
-            level={itemLevel}
+            level={nodeLevel}
             rerender={this.props.rerender}
           />
         }

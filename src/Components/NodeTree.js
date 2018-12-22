@@ -5,19 +5,13 @@ import {ITEM_TYPES} from '../Utils/Constants';
 
 
 const target = {
-  drop() {
-  },
-
+  drop() {},
   hover(props, monitor) {
     const {id: draggedId, parent } = monitor.getItem();
 
     if (!monitor.isOver({shallow: true})) return;
 
-    // const descendantNode = props.find(props.parent, items);
-    // if (descendantNode) return;
-
     if (parent === props.parent || draggedId === props.parent) return;
-
     props.onMove(draggedId, props.node.id, props.node.parent);
   }
 };
@@ -25,12 +19,12 @@ const target = {
 class NodeTree extends Component {
   render() {
     const {tasks, level, connectDropTarget, rerender } = this.props;
+    const levelUnitLine = (tasks.length > 1 && level === 1)? 'level_container--connected' : '';
 
     return connectDropTarget(
-      // return (
-      <div className="level__container">
+      <div className={`level__container ${levelUnitLine}`}>
         {
-          tasks && !!tasks.length && tasks.map((node, index) => {
+          tasks && !!tasks.length && tasks.map((node) => {
             return <Node
               key={node.id}
               node={node}
@@ -48,6 +42,6 @@ class NodeTree extends Component {
   }
 }
 
-export default DropTarget(ITEM_TYPES.NODE, target, (connect, monitor) => ({
+export default DropTarget(ITEM_TYPES.NODE, target, (connect) => ({
   connectDropTarget: connect.dropTarget()
 }))(NodeTree);

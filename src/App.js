@@ -2,11 +2,11 @@ import React, {Component} from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import NodeTree from './Components/NodeTree';
-import AddTaskModal from './Components/AddTaskModal'
 import {findAndDeleteFirst, findAndModifyFirst, findFirst, findAll} from 'obj-traverse/lib/obj-traverse';
-import {INITIAL_TASKS_STATE} from './Utils/Constants';
 
+import NodeTree from './Components/NodeTree';
+import AddTaskModal from './Components/AddTaskModal';
+import {INITIAL_TASKS_STATE} from './Utils/Constants';
 let TASKS_ENUM = 9;
 
 class App extends Component {
@@ -44,21 +44,22 @@ class App extends Component {
     });
   };
 
-  onAddTask = (value, parentId = null) => {
+  onAddTask = (value, taskData = null) => {
     TASKS_ENUM++;
 
     const newTask = {
       id: TASKS_ENUM,
       title: value,
-      parentId: parentId,
+      parentId: taskData.parentId,
       tasks: []
     };
 
-    if (parentId !== null) {
-      const parent = findAll(this.state, 'tasks', {id: parentId})[0];
-      const parentTasks = (parent.tasks.length) ? [...parent.tasks, newTask] : [newTask];
+    if (taskData.parentId !== null) {
+      const parent = findAll(this.state, 'tasks', {id: taskData.parentId})[0];
+      const insertedIndex = parent.tasks.findIndex((item) => item.id === taskData.id);
+      const parentTasks = (parent.tasks.length) ? parent.tasks.splice(insertedIndex + 1, 0, newTask) : [newTask];
 
-      const modifiedState = findAndModifyFirst(this.state, 'tasks', {id: parentId}, {...parent, tasks: parentTasks});
+      const modifiedState = findAndModifyFirst(this.state, 'tasks', {id: taskData.parentId}, parent);
       this.setState({
         tasks: modifiedState.tasks,
         rerender: !this.state.rerender
@@ -72,18 +73,19 @@ class App extends Component {
   };
 
   onMove = (id, overId, parentId) => {
-    console.log("onMove", id, overId, parentId);
     if (id === overId) return;
+    if(!parentId) return;
 
+    const draggedElementIndex = findFirst(this.state, 'tasks', {id: parentId}).tasks.findIndex((item) => item.id === id);
     const draggedElement = findFirst(this.state, 'tasks', {id: id});
+
     const stateWithoutDeleteElement = findAndDeleteFirst(this.state, 'tasks', {id});
-
     const parent = findFirst(stateWithoutDeleteElement, 'tasks', {id: parentId});
-
 
     if(parent) {
       const overElementIndex = parent.tasks.findIndex((item) => item.id === overId);
-      parent.tasks.splice(1, 0, draggedElement);
+      const insertIndex = (draggedElementIndex === overElementIndex + 1) ? overElementIndex  : overElementIndex + 1;
+      parent.tasks.splice(insertIndex, 0, draggedElement);
       const modifiedState = findAndModifyFirst(this.state, 'tasks', {id: parentId},  parent );
 
       modifiedState !== false && this.setState({
@@ -102,6 +104,8 @@ class App extends Component {
           onOpenModal={this.toggleModal}
           onCollapse={this.onCollapse}
           onMove={this.onMove}
+          // we need rerender props because React DnD doesn't
+          // fire rerender when nested elements changed
           rerender={this.state.rerender}
         />
 

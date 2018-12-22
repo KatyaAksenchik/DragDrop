@@ -1,7 +1,6 @@
 import React from 'react';
 import {Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 
-
 export default class AddTaskModal extends React.Component {
   constructor(props) {
     super(props);
@@ -13,7 +12,6 @@ export default class AddTaskModal extends React.Component {
   handleChange = (event) => {
     this.setState({value: event.target.value});
   };
-
 
   handleSubmit = () => {
     this.state.value && this.props.onAddTask(this.state.value, this.props.level);
@@ -29,7 +27,6 @@ export default class AddTaskModal extends React.Component {
   };
 
   render() {
-
     return (
       <Modal isOpen={this.props.isOpen} toggle={this.onClose}>
         <ModalHeader toggle={this.onClose}>Add task</ModalHeader>
