@@ -7,7 +7,6 @@ import AddTaskModal from './Components/AddTaskModal'
 import {findAndDeleteFirst, findAndModifyFirst, findFirst, findAll} from 'obj-traverse/lib/obj-traverse';
 import {INITIAL_TASKS_STATE} from './Utils/Constants';
 
-
 let TASKS_ENUM = 9;
 
 class App extends Component {
@@ -16,22 +15,26 @@ class App extends Component {
     this.state = {
       isOpenModal: false,
       currentModifiedLevel: null,
-      tasks: INITIAL_TASKS_STATE
+      tasks: INITIAL_TASKS_STATE,
+      rerender: false
     }
   }
 
   onCollapse = (itemId) => {
     const task = findFirst(this.state, 'tasks', {id: itemId});
     const modifiedState = findAndModifyFirst(this.state, 'tasks', {id: itemId}, {...task, isOpen: !task.isOpen});
-    console.log("modifiedState",modifiedState)
-    modifiedState !== false && this.setState({
-      tasks: modifiedState.tasks
+    this.setState({
+      tasks: modifiedState.tasks,
+      rerender: !this.state.rerender
     });
   };
 
   onDelete = (itemId) => {
     const modifiedState = findAndDeleteFirst(this.state, 'tasks', {id: itemId});
-    modifiedState !== false && this.setState(modifiedState);
+    this.setState({
+      tasks: modifiedState.tasks,
+      rerender: !this.state.rerender
+    });
   };
 
   toggleModal = (currentModifiedLevel = null) => {
@@ -56,25 +59,37 @@ class App extends Component {
       const parentTasks = (parent.tasks.length) ? [...parent.tasks, newTask] : [newTask];
 
       const modifiedState = findAndModifyFirst(this.state, 'tasks', {id: parentId}, {...parent, tasks: parentTasks});
-      this.setState(modifiedState);
+      this.setState({
+        tasks: modifiedState.tasks,
+        rerender: !this.state.rerender
+      });
     } else {
       this.setState({
-        tasks: [...this.state.tasks, newTask]
+        tasks: [...this.state.tasks, newTask],
+        rerender: !this.state.rerender
       })
     }
   };
 
   onMove = (id, overId, parentId) => {
-    const draggedElement = findFirst(this.state, 'tasks', {id: parentId});
+    console.log("onMove", id, overId, parentId);
+    if (id === overId) return;
+
+    const draggedElement = findFirst(this.state, 'tasks', {id: id});
     const stateWithoutDeleteElement = findAndDeleteFirst(this.state, 'tasks', {id});
-    const parent = findFirst(this.state, 'tasks', {id: parentId});
+
+    const parent = findFirst(stateWithoutDeleteElement, 'tasks', {id: parentId});
+
 
     if(parent) {
       const overElementIndex = parent.tasks.findIndex((item) => item.id === overId);
-      const newParentArray = parent.tasks.splice(overElementIndex, 0, draggedElement);
-      const modifiedState = findAndModifyFirst(this.state.tasks, 'tasks', {id: parentId}, {...parent, tasks: newParentArray});
+      parent.tasks.splice(1, 0, draggedElement);
+      const modifiedState = findAndModifyFirst(this.state, 'tasks', {id: parentId},  parent );
 
-      // this.setState(modifiedState)
+      modifiedState !== false && this.setState({
+        tasks: modifiedState.tasks,
+        rerender: !this.state.rerender
+      })
     }
   };
 
@@ -87,6 +102,7 @@ class App extends Component {
           onOpenModal={this.toggleModal}
           onCollapse={this.onCollapse}
           onMove={this.onMove}
+          rerender={this.state.rerender}
         />
 
         <AddTaskModal

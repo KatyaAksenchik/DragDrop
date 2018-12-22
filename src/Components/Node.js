@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Component} from 'react';
 import {MAX_NESTING_LEVEL, ITEM_TYPES} from '../Utils/Constants';
 import {DragSource, DropTarget} from 'react-dnd';
 import NodeTree from './NodeTree';
@@ -8,16 +8,12 @@ const source = {
     return {
       id: props.node.id,
       parentId: props.node.parentId,
-      tasks: props.node.tasks
+      tasks: props.node.tasks,
+      level: props.level
     }
   },
   isDragging(props, monitor) {
     return props.node.id === monitor.getItem().id
-  },
-  endDrag(props, monitor) {
-    const source = monitor.getItem();
-    const target = monitor.getDropResult();
-
   }
 };
 
@@ -27,15 +23,20 @@ const target = {
   },
 
   hover(props, monitor) {
-    const {id: draggedId} = monitor.getItem();
-    const overId = props.node.id;
+    const {id: draggedId, level: draggedLevel} = monitor.getItem();
 
-    props.onMove(draggedId, overId, props.node.parentId)
+    const overId = props.node.id;
+    const parentId = props.node.parentId;
+
+    if (draggedId === overId ) return;
+    if (!monitor.isOver({shallow: true})) return;
+
+    props.onMove(draggedId, overId, parentId)
   }
 };
 
 
-class Node extends React.Component {
+class Node extends Component {
   onCollapse = () => {
     const {onCollapse, node} = this.props;
     onCollapse(node.id);
@@ -57,7 +58,6 @@ class Node extends React.Component {
     const nodeType = (itemLevel === 1) ? 'User' : 'Task';
 
     return connectDropTarget(connectDragPreview(
-      // return(
       <div>
         {
           connectDragSource(
@@ -102,6 +102,7 @@ class Node extends React.Component {
             onCollapse={this.props.onCollapse}
             onMove={this.props.onMove}
             level={itemLevel}
+            rerender={this.props.rerender}
           />
         }
       </div>
