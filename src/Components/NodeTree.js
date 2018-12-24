@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {DropTarget} from 'react-dnd';
+import classNames from 'classnames';
 import Node from './Node'
 import {ITEM_TYPES} from '../Utils/Constants';
 
@@ -19,10 +20,13 @@ const target = {
 class NodeTree extends Component {
   render() {
     const {tasks, level, connectDropTarget, rerender } = this.props;
-    const levelUnitLine = (tasks.length > 1 && level === 1)? 'level_container--connected' : '';
+    const nodeTreeClasses = classNames({
+      'level__container': true,
+      'level_container--connected': tasks.length > 1 && level === 1
+    });
 
     return connectDropTarget(
-      <div className={`level__container ${levelUnitLine}`}>
+      <div className={nodeTreeClasses}>
         {
           tasks && !!tasks.length && tasks.map((node) => {
             return <Node

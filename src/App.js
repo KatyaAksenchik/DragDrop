@@ -2,66 +2,112 @@ import React, {Component} from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import {findAndDeleteFirst, findAndModifyFirst, findFirst, findAll} from 'obj-traverse/lib/obj-traverse';
+import {Button} from 'reactstrap';
+import {isNumber} from 'lodash';
+
+import {
+  findAndDeleteFirst,
+  findAndModifyFirst,
+  findFirst
+} from 'obj-traverse/lib/obj-traverse';
 
 import NodeTree from './Components/NodeTree';
 import AddTaskModal from './Components/AddTaskModal';
-import {INITIAL_TASKS_STATE} from './Utils/Constants';
-let TASKS_ENUM = 9;
+import {initState, nextTaskId} from './Utils/TasksState';
+
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       isOpenModal: false,
-      currentModifiedLevel: null,
-      tasks: INITIAL_TASKS_STATE,
+      modifiedNodeId: null,
+      tasks: initState(),
       rerender: false
     }
   }
 
+  modifyTaskVisibility = (tasksList, taskId) => {
+    return tasksList.map((task) => {
+      if(task.id === taskId) {
+        return {...task, isOpen: !task.isOpen}
+      }
+
+      if(task.tasks) {
+        return {...task, tasks: this.modifyTaskVisibility(task.tasks, taskId)}
+      }
+
+      return task;
+    })
+  };
+
   onCollapse = (itemId) => {
-    const task = findFirst(this.state, 'tasks', {id: itemId});
-    const modifiedState = findAndModifyFirst(this.state, 'tasks', {id: itemId}, {...task, isOpen: !task.isOpen});
+    const modifiedTasks = this.modifyTaskVisibility(this.state.tasks, itemId);
+
     this.setState({
-      tasks: modifiedState.tasks,
+      tasks: modifiedTasks,
       rerender: !this.state.rerender
     });
+  };
+
+  onDeleteTask = (tasksList, taskId) => {
+    return tasksList.reduce((result, task) => {
+      if(task.id === taskId) {
+        return result;
+      }
+
+      if(task.tasks) {
+        return [ ...result, {...task, tasks: this.onDeleteTask(task.tasks, taskId)}];
+      }
+
+      return [...result, task];
+    }, [])
   };
 
   onDelete = (itemId) => {
-    const modifiedState = findAndDeleteFirst(this.state, 'tasks', {id: itemId});
+    const modifiedTasks = this.onDeleteTask(this.state.tasks, itemId);
+
     this.setState({
-      tasks: modifiedState.tasks,
+      tasks: modifiedTasks,
       rerender: !this.state.rerender
     });
   };
 
-  toggleModal = (currentModifiedLevel = null) => {
+  toggleModal = (modifiedNodeId = null) => {
     this.setState({
       isOpenModal: !this.state.isOpenModal,
-      currentModifiedLevel: currentModifiedLevel
+      modifiedNodeId: modifiedNodeId
     });
   };
 
-  onAddTask = (value, taskData = null) => {
-    TASKS_ENUM++;
+  onAddNewTask = (tasksList, taskId, newTask) => {
+    return tasksList.map((task) => {
+      if(task.id === taskId) {
+        return {...task, tasks: [...task.tasks, newTask]}
+      }
+
+      if(task.tasks) {
+        return {...task, tasks: this.onAddNewTask(task.tasks, taskId, newTask)}
+      }
+
+      return task;
+    })
+  };
+
+  onAddTask = (value, modifiedNodeId = null) => {
 
     const newTask = {
-      id: TASKS_ENUM,
+      id: nextTaskId(),
       title: value,
-      parentId: taskData.parentId,
+      isOpen: true,
       tasks: []
     };
 
-    if (taskData.parentId !== null) {
-      const parent = findAll(this.state, 'tasks', {id: taskData.parentId})[0];
-      const insertedIndex = parent.tasks.findIndex((item) => item.id === taskData.id);
-      const parentTasks = (parent.tasks.length) ? parent.tasks.splice(insertedIndex + 1, 0, newTask) : [newTask];
+    if (isNumber(modifiedNodeId)) {
+      const modifiedTasks = this.onAddNewTask(this.state.tasks, modifiedNodeId, newTask);
 
-      const modifiedState = findAndModifyFirst(this.state, 'tasks', {id: taskData.parentId}, parent);
       this.setState({
-        tasks: modifiedState.tasks,
+        tasks: modifiedTasks,
         rerender: !this.state.rerender
       });
     } else {
@@ -74,7 +120,7 @@ class App extends Component {
 
   onMove = (id, overId, parentId) => {
     if (id === overId) return;
-    if(!parentId) return;
+    if (!parentId) return;
 
     const draggedElementIndex = findFirst(this.state, 'tasks', {id: parentId}).tasks.findIndex((item) => item.id === id);
     const draggedElement = findFirst(this.state, 'tasks', {id: id});
@@ -82,11 +128,11 @@ class App extends Component {
     const stateWithoutDeleteElement = findAndDeleteFirst(this.state, 'tasks', {id});
     const parent = findFirst(stateWithoutDeleteElement, 'tasks', {id: parentId});
 
-    if(parent) {
+    if (parent) {
       const overElementIndex = parent.tasks.findIndex((item) => item.id === overId);
-      const insertIndex = (draggedElementIndex === overElementIndex + 1) ? overElementIndex  : overElementIndex + 1;
+      const insertIndex = (draggedElementIndex === overElementIndex + 1) ? overElementIndex : overElementIndex + 1;
       parent.tasks.splice(insertIndex, 0, draggedElement);
-      const modifiedState = findAndModifyFirst(this.state, 'tasks', {id: parentId},  parent );
+      const modifiedState = findAndModifyFirst(this.state, 'tasks', {id: parentId}, parent);
 
       modifiedState !== false && this.setState({
         tasks: modifiedState.tasks,
@@ -98,6 +144,12 @@ class App extends Component {
   render() {
     return (
       <div className="app">
+        <Button
+          color="primary"
+          onClick={this.toggleModal}
+        >
+          Add user
+        </Button>
         <NodeTree
           tasks={this.state.tasks}
           onDelete={this.onDelete}
@@ -113,7 +165,7 @@ class App extends Component {
           isOpen={this.state.isOpenModal}
           onClose={this.toggleModal}
           onAddTask={this.onAddTask}
-          level={this.state.currentModifiedLevel}
+          level={this.state.modifiedNodeId}
         />
       </div>
     );

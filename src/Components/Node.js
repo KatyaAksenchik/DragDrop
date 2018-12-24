@@ -49,15 +49,12 @@ class Node extends Component {
 
   onOpenModal = () => {
     const {onOpenModal, node} = this.props;
-    onOpenModal({
-      id: node.id,
-      parentId :node.parentId
-    })
+    onOpenModal(node.id)
   };
 
   render() {
-    const {node, level, connectDropTarget, connectDragSource, connectDragPreview} = this.props;
-    const nodeLevel = (level) ? level + 1 : 1;
+    const {node, level = 0, connectDropTarget, connectDragSource, connectDragPreview} = this.props;
+    const nodeLevel = level + 1;
     const nodeType = (nodeLevel === 1) ? 'User' : 'Task';
 
     return connectDropTarget(connectDragPreview(
