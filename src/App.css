@@ -5,6 +5,7 @@
   --container-level-offset: 60px;
   --level-offset: 0.5em;
 }
+
 * {
   padding: 0;
   margin: 0;
@@ -45,18 +46,23 @@
   align-items: center;
   padding: 1em;
   margin: var(--level-offset) 0;
+  /*transition: opacity 0.5s;*/
+}
+
+.level__item.level__item--is-dragging {
+  opacity: 0.3;
 }
 
 .level__item:not(.level__item--1):before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  bottom: 50%;
-  left: calc(var(--container-level-offset) / -2);
-  width: calc(var(--container-level-offset) / 2);
-  height: calc( 100% + var(--level-offset));
-  border-left: 1px solid black;
-  border-bottom: 1px solid black;
+  /*content: '';*/
+  /*position: absolute;*/
+  /*z-index: -1;*/
+  /*bottom: 50%;*/
+  /*left: calc(var(--container-level-offset) / -2);*/
+  /*width: calc(var(--container-level-offset) / 2);*/
+  /*height: calc( 100% + var(--level-offset));*/
+  /*border-left: 1px solid black;*/
+  /*border-bottom: 1px solid black;*/
 }
 
 .level__item-title {
@@ -83,9 +89,9 @@
 .level_container--connected:after {
   content: '';
   position: absolute;
-  left: calc(var(--container-level-offset)/2);
+  left: calc(var(--container-level-offset) / 2);
   top: var(--level-offset);
-  height: calc(100% - (var(--container-level-offset)*2) + (var(--level-offset))*2);
+  height: calc(100% - (var(--container-level-offset) * 2) + (var(--level-offset)) * 2);
   border-left: solid 1px black;
 }
 

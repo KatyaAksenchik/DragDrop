@@ -1,16 +1,12 @@
 import React, {Component} from 'react';
 import {DragSource, DropTarget} from 'react-dnd';
+import classNames from 'classnames';
 import NodeTree from './NodeTree';
 import {MAX_NESTING_LEVEL, ITEM_TYPES} from '../Utils/Constants';
 
 const source = {
   beginDrag(props) {
-    return {
-      id: props.node.id,
-      parentId: props.node.parentId,
-      tasks: props.node.tasks,
-      level: props.level
-    }
+    return {...props.node, level: props.level};
   },
   isDragging(props, monitor) {
     return props.node.id === monitor.getItem().id
@@ -21,17 +17,13 @@ const target = {
   canDrop() {
     return false
   },
-
   hover(props, monitor) {
-    const {id: draggedId} = monitor.getItem();
+    const draggedTask = monitor.getItem();
+    const overTask = {...props.node, level: props.level};
 
-    const overId = props.node.id;
-    const parentId = props.node.parentId;
-
-    if (draggedId === overId ) return;
+    if (draggedTask.id === overTask.id) return;
     if (!monitor.isOver({shallow: true})) return;
-
-    props.onMove(draggedId, overId, parentId)
+    props.onMove(draggedTask, overTask)
   }
 };
 
@@ -53,17 +45,21 @@ class Node extends Component {
   };
 
   render() {
-    const {node, level = 0, connectDropTarget, connectDragSource, connectDragPreview} = this.props;
+    const {node, level = 0, isDragging, connectDropTarget, connectDragSource, connectDragPreview} = this.props;
     const nodeLevel = level + 1;
     const nodeType = (nodeLevel === 1) ? 'User' : 'Task';
+    const nodeContainerClasses = classNames({
+      'level__item': true,
+      'level__item--is-dragging': isDragging,
+    }, [`level__item--${nodeLevel}`]);
 
     return connectDropTarget(connectDragPreview(
       <div>
         {
           connectDragSource(
-            <div className={`level__item level__item--${nodeLevel}`}>
+            <div className={nodeContainerClasses}>
               <p className="level__item-title">
-                {nodeType} "{node.title}" (Level {nodeLevel})
+                {nodeType} "{node.title}" (Level {nodeLevel}) {node.id}
               </p>
               <div className="level_item_actions">
                 <button
@@ -72,12 +68,15 @@ class Node extends Component {
                 >
                   X
                 </button>
-                <button
-                  className="btn"
-                  onClick={this.onOpenModal}
-                >
-                  +
-                </button>
+                {
+                  nodeLevel !== MAX_NESTING_LEVEL &&
+                  <button
+                    className="btn"
+                    onClick={this.onOpenModal}
+                  >
+                    +
+                  </button>
+                }
                 {
                   nodeLevel !== MAX_NESTING_LEVEL &&
                   node.tasks &&

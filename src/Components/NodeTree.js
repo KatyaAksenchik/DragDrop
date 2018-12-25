@@ -6,14 +6,16 @@ import {ITEM_TYPES} from '../Utils/Constants';
 
 
 const target = {
-  drop() {},
+  canDrop() {
+    return false
+  },
   hover(props, monitor) {
-    const {id: draggedId, parent } = monitor.getItem();
+    const draggedTask = monitor.getItem();
+    const overTask = {...props.node, level: props.level};
 
+    if (draggedTask.id === overTask.id) return;
     if (!monitor.isOver({shallow: true})) return;
-
-    if (parent === props.parent || draggedId === props.parent) return;
-    props.onMove(draggedId, props.node.id, props.node.parent);
+    // props.onMove(draggedTask, overTask)
   }
 };
 

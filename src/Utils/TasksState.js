@@ -1,3 +1,5 @@
+import {NODE_TYPES} from './Constants';
+
 let idCounter = 0;
 
 export function nextTaskId() {
