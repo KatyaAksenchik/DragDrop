@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {DragSource, DropTarget} from 'react-dnd';
 import classNames from 'classnames';
+
 import NodeTree from './NodeTree';
 import {MAX_NESTING_LEVEL, ITEM_TYPES} from '../Utils/Constants';
 
@@ -60,7 +61,7 @@ class Node extends Component {
           connectDragSource(
             <div className={nodeContainerClasses}>
               <p className="level__item-title">
-                {nodeType} "{node.title}" (Level {nodeLevel}) {node.id}
+                {nodeType} "{node.title}" (Level {nodeLevel})
               </p>
               <div className="level_item_actions">
                 <button

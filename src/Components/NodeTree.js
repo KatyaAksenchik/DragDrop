@@ -22,8 +22,7 @@ class NodeTree extends Component {
   render() {
     const {tasks, level, connectDropTarget, rerender } = this.props;
     const nodeTreeClasses = classNames({
-      'level__container': true,
-      'level_container--connected': tasks.length > 1 && level === 1
+      'level__container': true
     });
 
     return connectDropTarget(
