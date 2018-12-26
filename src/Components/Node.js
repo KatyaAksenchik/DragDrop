@@ -7,7 +7,7 @@ import {MAX_NESTING_LEVEL, ITEM_TYPES} from '../Utils/Constants';
 
 const source = {
   beginDrag(props) {
-    return {...props.node, level: props.level};
+    return {...props.node, level: (props.level) ? props.level : 0};
   },
   isDragging(props, monitor) {
     return props.node.id === monitor.getItem().id
@@ -20,7 +20,7 @@ const target = {
   },
   drop(props, monitor) {
     const draggedTask = monitor.getItem();
-    const overTask = {...props.node, level: props.level};
+    const overTask = {...props.node, level: (props.level) ? props.level : 0};
 
     if (draggedTask.id === overTask.id) return;
     if (!monitor.isOver({shallow: true})) return;

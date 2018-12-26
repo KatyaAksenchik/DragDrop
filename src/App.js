@@ -79,7 +79,7 @@ class App extends Component {
     if (draggedTask.id === overTask.id) return;
     let modifiedState = this.state.tasks.slice(0);
 
-    if (draggedTask.level !== overTask.level) {
+    if (draggedTask.level > overTask.level) {
       const stateWithoutDraggedTask = onDeleteTaskRecursively(this.state.tasks, draggedTask.id);
       modifiedState = onAddNewTaskRecursively(stateWithoutDraggedTask, overTask.id, draggedTask)
     }

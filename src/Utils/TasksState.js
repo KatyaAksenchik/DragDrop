@@ -76,7 +76,9 @@ export function findAndModifyParentTasks(tasksList, overTask, draggedTask) {
   }
 
   if (overTaskIndex !== -1 && draggedTaskIndex === -1) {
-    return [...tasksList, draggedTask]
+    let updatedList = tasksList.slice(0);
+    updatedList.splice(overTaskIndex + 1, 0, draggedTask);
+    return updatedList;
   }
 
   if (draggedTaskIndex !== -1 && overTaskIndex === -1) {
