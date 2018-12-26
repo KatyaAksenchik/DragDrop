@@ -15,14 +15,15 @@ const source = {
 
 const target = {
   canDrop() {
-    return false
+    return true
   },
-  hover(props, monitor) {
+  drop(props, monitor) {
     const draggedTask = monitor.getItem();
     const overTask = {...props.node, level: props.level};
 
     if (draggedTask.id === overTask.id) return;
     if (!monitor.isOver({shallow: true})) return;
+
     props.onMove(draggedTask, overTask)
   }
 };
