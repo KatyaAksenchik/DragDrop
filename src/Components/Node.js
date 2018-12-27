@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {DragSource, DropTarget} from 'react-dnd';
+import { FaTrashAlt, FaPlus, FaChevronDown, FaChevronRight } from 'react-icons/fa';
 import classNames from 'classnames';
 
 import NodeTree from './NodeTree';
@@ -16,9 +17,9 @@ const source = {
 
 const target = {
   canDrop() {
-    return true
+    return false
   },
-  drop(props, monitor) {
+  hover(props, monitor) {
     const draggedTask = monitor.getItem();
     const overTask = {...props.node, level: (props.level) ? props.level : 0};
 
@@ -62,13 +63,19 @@ class Node extends Component {
             <div className={nodeContainerClasses}>
               <p className="level__item-title">
                 {nodeType} "{node.title}" (Level {nodeLevel})
+                {
+                  node.tasks && node.tasks.length > 0 &&
+                  <span className="level__item-substask-num">
+                    { node.tasks.length}
+                  </span>
+                }
               </p>
               <div className="level_item_actions">
                 <button
                   className="btn"
                   onClick={this.onDelete}
                 >
-                  X
+                  <FaTrashAlt />
                 </button>
                 {
                   nodeLevel !== MAX_NESTING_LEVEL &&
@@ -76,7 +83,7 @@ class Node extends Component {
                     className="btn"
                     onClick={this.onOpenModal}
                   >
-                    +
+                    <FaPlus/>
                   </button>
                 }
                 {
@@ -87,7 +94,7 @@ class Node extends Component {
                     className="btn"
                     onClick={this.onCollapse}
                   >
-                    {node.isOpen ? 'V' : '>'}
+                    {node.isOpen? <FaChevronDown/> : <FaChevronRight/>}
                   </button>
                 }
               </div>

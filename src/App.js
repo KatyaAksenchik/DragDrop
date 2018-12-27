@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import {isNumber} from 'lodash';
 import {Button} from 'reactstrap';
+import {isEqual} from 'lodash';
 
 import NodeTree from './Components/NodeTree';
 import AddTaskModal from './Components/AddTaskModal';
@@ -30,25 +31,31 @@ class App extends Component {
   onCollapse = (itemId) => {
     const modifiedTasks = modifyTaskVisibilityRecursively(this.state.tasks, itemId);
 
-    this.setState({
-      tasks: modifiedTasks,
-      rerender: !this.state.rerender
+    this.setState(function (state) {
+      return {
+        tasks: modifiedTasks,
+        rerender: !state.rerender
+      }
     });
   };
 
   onDelete = (itemId) => {
     const modifiedTasks = onDeleteTaskRecursively(this.state.tasks, itemId);
 
-    this.setState({
-      tasks: modifiedTasks,
-      rerender: !this.state.rerender
+    this.setState(function (state) {
+      return {
+        tasks: modifiedTasks,
+        rerender: !state.rerender
+      }
     });
   };
 
   toggleModal = (modifiedNodeId = null) => {
-    this.setState({
-      isOpenModal: !this.state.isOpenModal,
-      modifiedNodeId: modifiedNodeId
+    this.setState((state) => {
+      return {
+        isOpenModal: !state.isOpenModal,
+        modifiedNodeId: modifiedNodeId
+      }
     });
   };
 
@@ -63,36 +70,53 @@ class App extends Component {
     if (isNumber(modifiedNodeId)) {
       const modifiedTasks = onAddNewTaskRecursively(this.state.tasks, modifiedNodeId, newTask);
 
-      this.setState({
-        tasks: modifiedTasks,
-        rerender: !this.state.rerender
-      });
-    } else {
-      this.setState({
-        tasks: [...this.state.tasks, newTask],
-        rerender: !this.state.rerender
+      this.setState((state) => {
+        if (!isEqual(state.tasks, modifiedTasks)) {
+          return {
+            tasks: modifiedTasks,
+            rerender: !state.rerender
+          }
+        }
       })
+
+    } else {
+      this.setState((state) => {
+        return {
+          tasks: [...state.tasks, newTask],
+          rerender: !state.rerender
+        }
+      });
     }
   };
 
   onMove = (draggedTask, overTask) => {
     if (draggedTask.id === overTask.id) return;
-    let modifiedState = this.state.tasks.slice(0);
+
 
     if (draggedTask.level > overTask.level) {
-      const stateWithoutDraggedTask = onDeleteTaskRecursively(this.state.tasks, draggedTask.id);
-      modifiedState = onAddNewTaskRecursively(stateWithoutDraggedTask, overTask.id, draggedTask)
+      let modifiedTasks = this.state.tasks.slice(0);
+      const stateWithoutDraggedTask = onDeleteTaskRecursively(modifiedTasks, draggedTask.id);
+      modifiedTasks = onAddNewTaskRecursively(stateWithoutDraggedTask, overTask.id, draggedTask);
+
+      this.setState((state) => {
+          return {
+            tasks: modifiedTasks,
+            rerender: !state.rerender
+          }
+      })
     }
 
     if (draggedTask.level === overTask.level) {
-      modifiedState = findAndModifyParentTasks(this.state.tasks, overTask, draggedTask);
+      let modifiedTasks = this.state.tasks.slice(0);
+      modifiedTasks = findAndModifyParentTasks(modifiedTasks, overTask, draggedTask);
+
+      this.setState((state) => {
+          return {
+            tasks: modifiedTasks,
+            rerender: !state.rerender
+          }
+      })
     }
-
-    this.setState({
-      tasks: modifiedState,
-      rerender: !this.state.rerender
-    })
-
   };
 
   render() {

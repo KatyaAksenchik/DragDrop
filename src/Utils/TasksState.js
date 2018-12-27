@@ -97,7 +97,9 @@ export function findAndModifyParentTasks(tasksList, overTask, draggedTask) {
 export function onAddNewTaskRecursively(tasksList, taskId, newTask) {
   return tasksList.map((task) => {
     if (task.id === taskId) {
-      return {...task, tasks: [...task.tasks, newTask]}
+      // we change isOpen if it is first task or substask
+      const shouldChangeIsOpen = task.tasks.length === 0;
+      return {...task, tasks: [...task.tasks, newTask], ...shouldChangeIsOpen && {isOpen: true}}
     }
 
     if (task.tasks) {

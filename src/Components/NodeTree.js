@@ -7,9 +7,9 @@ import {ITEM_TYPES} from '../Utils/Constants';
 
 const target = {
   canDrop() {
-    return true
+    return false
   },
-  drop(props, monitor) {
+  hover(props, monitor) {
     const draggedTask = monitor.getItem();
     const overTask = {...props.node, level: props.level};
 
